@@ -1,0 +1,8 @@
+[package]
+name = "zozulya-db"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zozulya-ir.workspace = true
+salsa.workspace = true

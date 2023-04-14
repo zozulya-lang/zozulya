@@ -4,6 +4,10 @@ use miette::{bail, Context, IntoDiagnostic, Result};
 use zozulya_db::Database;
 use zozulya_ir::{InputFile, Symbol};
 
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
 fn main() -> Result<()> {
     let mut args = std::env::args().skip(1);
 
@@ -15,10 +19,13 @@ fn main() -> Result<()> {
 
             let db = Database::default();
 
-            let path = Symbol::intern(&db, path);
-            let input_file = InputFile::new(&db, path, input);
+            let input_file = {
+                let path = Symbol::intern(&db, path);
+                InputFile::new(&db, path, input)
+            };
 
-            dbg!(input_file);
+            let source_file = zozulya_parse::file(&db, input_file);
+            dbg!(source_file);
             Ok(())
         }
         Some(_) => bail!("you must specify exactly one input file"),

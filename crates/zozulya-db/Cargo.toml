@@ -5,4 +5,6 @@ edition = "2021"
 
 [dependencies]
 zozulya-ir.workspace = true
+zozulya-parse.workspace = true
+
 salsa.workspace = true

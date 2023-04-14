@@ -2,8 +2,8 @@ use crate::Symbol;
 
 #[salsa::input]
 pub struct InputFile {
-    path: Symbol,
+    pub path: Symbol,
 
     #[return_ref]
-    input: String,
+    pub input: String,
 }

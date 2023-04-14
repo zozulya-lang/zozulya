@@ -1,4 +1,4 @@
-#[salsa::db(zozulya_ir::Jar)]
+#[salsa::db(zozulya_ir::Jar, zozulya_parse::Jar)]
 #[derive(Default)]
 pub struct Database {
     storage: salsa::Storage<Self>,

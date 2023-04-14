@@ -1,2 +1,5 @@
 [build]
-rustflags = ["-Dclippy::use_self", "-Dunused_qualifications"]
+rustflags = [
+    "-Dclippy::use_self",
+    "-Dunused_qualifications",
+]

@@ -6,6 +6,7 @@ salsa = { git = "https://github.com/salsa-rs/salsa/", package = "salsa-2022" }
 
 zozulya-db = { path = "crates/zozulya-db" }
 zozulya-ir = { path = "crates/zozulya-ir" }
+zozulya-parse = { path = "crates/zozulya-parse" }
 
 [package]
 name = "zozulya"
@@ -17,6 +18,10 @@ miette = { version = "5.7", features = ["fancy"] }
 
 zozulya-db.workspace = true
 zozulya-ir.workspace = true
+zozulya-parse.workspace = true
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+jemallocator = { version = "0.5.0", package = "tikv-jemallocator" }
 
 [profile.dev]
 debug = 0

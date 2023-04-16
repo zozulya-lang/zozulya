@@ -1,7 +1,6 @@
 mod input_file;
 mod source_file;
 mod symbol;
-mod syntax;
 
 pub use input_file::InputFile;
 pub use source_file::SourceFile;

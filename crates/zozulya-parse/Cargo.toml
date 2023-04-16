@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+unicode-ident = "1.0"
 salsa.workspace = true
-
 zozulya-ir.workspace = true
+
+[dev-dependencies]
+expect-test = "1.4"

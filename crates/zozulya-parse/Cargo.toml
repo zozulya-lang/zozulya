@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 unicode-ident = "1.0"
+rowan = "0.15"
 salsa.workspace = true
 zozulya-ir.workspace = true
 

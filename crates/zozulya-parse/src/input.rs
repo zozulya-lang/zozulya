@@ -1,32 +1,32 @@
+mod classes;
 mod cursor;
 
-use self::cursor::Cursor;
 use crate::syntax::Syntax;
 
 #[derive(Default)]
 pub struct Input<'me> {
-    pub input: &'me str,
+    pub text: &'me str,
     pub tokens: Vec<Syntax>,
-    pub spans: Vec<u32>,
+    pub start_offsets: Vec<u32>,
 }
 
 impl<'me> Input<'me> {
-    pub fn of(input: &'me str) -> Self {
-        let mut builder = InputBuilder::new(input);
-        let mut cursor = Cursor::new(input);
+    pub fn of(text: &'me str) -> Self {
+        let mut builder = InputBuilder::new(text);
+        let mut cursor = cursor::Cursor::new(text);
 
         while let Some(first_char) = cursor.shift() {
             let token = match first_char {
-                _ if unicode_ident::is_xid_start(first_char) => {
-                    cursor.shift_while(unicode_ident::is_xid_continue);
+                _ if classes::is_ident_start(first_char) => {
+                    cursor.shift_while(classes::is_ident_continue);
                     T![@ident]
                 }
-                _ if first_char.is_whitespace() => {
-                    cursor.shift_while(|ch| ch.is_whitespace());
+                _ if classes::is_whitespace(first_char) => {
+                    cursor.shift_while(classes::is_whitespace);
                     T![@whitespace]
                 }
-                _ if first_char.is_ascii_digit() => {
-                    cursor.shift_while(|ch| ch.is_ascii_digit() || ch == '_');
+                _ if classes::is_dec_digit(first_char) => {
+                    cursor.shift_while(classes::is_dec_digit);
                     T![@int]
                 }
                 ':' if cursor.shift_if('=') => T![:=],
@@ -41,29 +41,36 @@ impl<'me> Input<'me> {
 
         builder.finish()
     }
+
+    pub fn slice(&self, pos: usize) -> &str {
+        let hi = self.start_offsets[pos + 1] as usize;
+        let lo = self.start_offsets[pos] as usize;
+
+        &self.text[lo..hi]
+    }
 }
 
 #[derive(Default)]
 struct InputBuilder<'me> {
-    input: Input<'me>,
+    text: Input<'me>,
     offset: u32,
 }
 
 impl<'me> InputBuilder<'me> {
-    fn new(input: &'me str) -> Self {
-        Self { input: Input { input, ..<_>::default() }, offset: 0 }
+    fn new(text: &'me str) -> Self {
+        Self { text: Input { text, ..<_>::default() }, offset: 0 }
     }
 
     fn push(&mut self, syntax: Syntax, len: u32) {
-        self.input.tokens.push(syntax);
-        self.input.spans.push(self.offset);
+        self.text.tokens.push(syntax);
+        self.text.start_offsets.push(self.offset);
 
         self.offset += len;
     }
 
     fn finish(mut self) -> Input<'me> {
         self.push(T![@eof], 0);
-        self.input
+        self.text
     }
 }
 
@@ -75,7 +82,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let input = Input::of("ident := 42");
+        let text = Input::of("ident := 42");
 
         expect![[r#"
             [
@@ -87,6 +94,6 @@ mod tests {
                 EOF,
             ]
         "#]]
-        .assert_debug_eq(&input.tokens);
+        .assert_debug_eq(&text.tokens);
     }
 }

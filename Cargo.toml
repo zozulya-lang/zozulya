@@ -3,6 +3,7 @@ members = ["crates/*"]
 
 [workspace.dependencies]
 salsa = { git = "https://github.com/salsa-rs/salsa/", package = "salsa-2022" }
+rowan = "0.15"
 
 zozulya-db = { path = "crates/zozulya-db" }
 zozulya-ir = { path = "crates/zozulya-ir" }

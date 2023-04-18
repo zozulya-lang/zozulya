@@ -2,10 +2,10 @@ mod expr;
 mod stmt;
 
 use rowan::{GreenNode, GreenNodeBuilder};
+use zozulya_ir::cst::ZozulyaKind::{self, *};
 
 use crate::input::Input;
 use crate::sink::Sink;
-use crate::syntax::Syntax;
 
 pub struct Parser<'me> {
     input: Input<'me>,
@@ -43,26 +43,26 @@ impl<'me> Parser<'me> {
         Marker { pos }
     }
 
-    fn peek(&self) -> Syntax {
+    fn peek(&self) -> ZozulyaKind {
         self.input.tokens[self.pos]
     }
 
-    fn at(&self, syntax: Syntax) -> bool {
-        self.peek() == syntax
+    fn at(&self, kind: ZozulyaKind) -> bool {
+        self.peek() == kind
     }
 
-    fn expect(&mut self, syntax: Syntax) {
-        match self.at(syntax) {
+    fn expect(&mut self, kind: ZozulyaKind) {
+        match self.at(kind) {
             true => {
                 self.bump();
             }
-            false => unreachable!("expected {syntax:?}, found {:?}", self.peek()),
+            false => unreachable!("expected {kind:?}, found {:?}", self.peek()),
         }
     }
 
     fn bump(&mut self) {
         let peeked = self.peek();
-        if peeked != T![@eof] {
+        if peeked != EOF {
             self.events.push(Event::Token { pos: self.pos as u32 });
             self.next_token();
         }
@@ -72,14 +72,14 @@ impl<'me> Parser<'me> {
 
 #[derive(Debug)]
 pub enum Event {
-    Start { syntax: Syntax },
+    Start { kind: ZozulyaKind },
     Token { pos: u32 },
     Finish,
 }
 
 impl Event {
     pub fn tombstone() -> Self {
-        Self::Start { syntax: T![@tombstone] }
+        Self::Start { kind: TOMBSTONE }
     }
 }
 
@@ -88,11 +88,11 @@ struct Marker {
 }
 
 impl Marker {
-    fn complete(self, parser: &mut Parser, syntax: Syntax) {
+    fn complete(self, parser: &mut Parser, kind: ZozulyaKind) {
         let Self { pos } = self;
         match &mut parser.events[pos as usize] {
-            Event::Start { syntax: slot, .. } => {
-                *slot = syntax;
+            Event::Start { kind: slot, .. } => {
+                *slot = kind;
             }
             _ => unreachable!(),
         }

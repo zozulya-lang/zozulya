@@ -907,6 +907,7 @@ dependencies = [
 name = "zozulya-ir"
 version = "0.1.0"
 dependencies = [
+ "rowan",
  "salsa-2022",
 ]
 

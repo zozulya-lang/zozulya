@@ -1,12 +1,12 @@
 mod classes;
 mod cursor;
 
-use crate::syntax::Syntax;
+use zozulya_ir::cst::ZozulyaKind::{self, *};
 
 #[derive(Default)]
 pub struct Input<'me> {
     pub text: &'me str,
-    pub tokens: Vec<Syntax>,
+    pub tokens: Vec<ZozulyaKind>,
     pub start_offsets: Vec<u32>,
 }
 
@@ -19,20 +19,20 @@ impl<'me> Input<'me> {
             let token = match first_char {
                 _ if classes::is_ident_start(first_char) => {
                     cursor.shift_while(classes::is_ident_continue);
-                    T![@ident]
+                    IDENT
                 }
                 _ if classes::is_whitespace(first_char) => {
                     cursor.shift_while(classes::is_whitespace);
-                    T![@whitespace]
+                    WHITESPACE
                 }
                 _ if classes::is_dec_digit(first_char) => {
                     cursor.shift_while(classes::is_dec_digit);
-                    T![@int]
+                    INT
                 }
-                ':' if cursor.shift_if('=') => T![:=],
-                ':' => T![:],
-                '=' => T![=],
-                _ => T![@unknown],
+                ':' if cursor.shift_if('=') => ASSIGN,
+                ':' => COLON,
+                '=' => EQ,
+                _ => UNKNOWN,
             };
 
             let len = cursor.reset_len();
@@ -61,15 +61,15 @@ impl<'me> InputBuilder<'me> {
         Self { text: Input { text, ..<_>::default() }, offset: 0 }
     }
 
-    fn push(&mut self, syntax: Syntax, len: u32) {
-        self.text.tokens.push(syntax);
+    fn push(&mut self, kind: ZozulyaKind, len: u32) {
+        self.text.tokens.push(kind);
         self.text.start_offsets.push(self.offset);
 
         self.offset += len;
     }
 
     fn finish(mut self) -> Input<'me> {
-        self.push(T![@eof], 0);
+        self.push(EOF, 0);
         self.text
     }
 }
